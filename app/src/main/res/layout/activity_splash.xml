@@ -1,0 +1,41 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
+    android:padding="16dp">
+
+    <!-- Biểu tượng âm nhạc với hiệu ứng phóng to -->
+    <ImageView
+        android:id="@+id/icon_music"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/ic_music"
+        android:contentDescription="@string/app_name"
+        android:scaleType="centerCrop" />
+
+    <!-- Text phong cách Gen Z -->
+    <TextView
+        android:id="@+id/text_splash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/icon_music"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="Let's Groove!"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/roboto_condensed" />
+
+    <!-- Hiệu ứng loading (tuỳ chọn) -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_splash"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:indeterminateTint="@color/white"
+        android:visibility="gone" />
+</RelativeLayout>

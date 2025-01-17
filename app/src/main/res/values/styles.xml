@@ -1,7 +1,17 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Style cho TextInputLayout -->
     <style name="ShapeAppearanceOverlay.CustomTextInputLayout" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">8dp</item>
+    </style>
+
+    <!-- Theme cho SplashActivity -->
+    <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Màu nền của splash screen -->
+        <item name="android:windowBackground">@drawable/gradient_background</item>
+
+        <!-- Màu nền của hệ thống (status bar và navigation bar) -->
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:navigationBarColor">@color/white</item>
     </style>
 </resources>
