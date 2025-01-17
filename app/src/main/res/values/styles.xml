@@ -1,0 +1,7 @@
+<resources>
+    <!-- Style cho TextInputLayout -->
+    <style name="ShapeAppearanceOverlay.CustomTextInputLayout" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+</resources>
