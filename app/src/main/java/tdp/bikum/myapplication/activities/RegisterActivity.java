@@ -3,6 +3,7 @@ package tdp.bikum.myapplication.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -11,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import java.io.IOException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -69,28 +72,37 @@ public class RegisterActivity extends AppCompatActivity {
 
         binding.progressBar.setVisibility(View.VISIBLE);
 
-        // Gọi API gửi mã OTP
-        SendOtpRequest sendOtpRequest = new SendOtpRequest(email);
+        // Tạo đối tượng User để gửi lên server
+        User user = new User(email, password);
         ApiService apiService = RetrofitClient.getApiService();
-        Call<Void> call = apiService.sendOtp(sendOtpRequest);
+        Call<Void> call = apiService.register(user);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 binding.progressBar.setVisibility(View.GONE);
 
                 if (response.isSuccessful()) {
+                    // Đăng ký thành công, chuyển sang OtpActivity để nhập OTP
                     Intent intent = new Intent(RegisterActivity.this, OtpActivity.class);
                     intent.putExtra("email", email);
                     intent.putExtra("password", password);
                     startActivity(intent);
                 } else {
-                    Toast.makeText(RegisterActivity.this, "Gửi mã OTP thất bại: " + response.message(), Toast.LENGTH_SHORT).show();
+                    // Xử lý lỗi từ server
+                    try {
+                        String errorBody = response.errorBody().string();
+                        Log.e("RegisterActivity", "Lỗi: " + errorBody);
+                        Toast.makeText(RegisterActivity.this, "Đăng ký thất bại: " + errorBody, Toast.LENGTH_SHORT).show();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 binding.progressBar.setVisibility(View.GONE);
+                Log.e("RegisterActivity", "Lỗi kết nối: " + t.getMessage());
                 Toast.makeText(RegisterActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

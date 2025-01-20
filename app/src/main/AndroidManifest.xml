@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -8,7 +9,6 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
-
         <!-- SplashActivity là màn hình khởi động -->
         <activity
             android:name=".activities.SplashActivity"
@@ -16,11 +16,10 @@
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Các activity khác -->
+        </activity> <!-- Các activity khác -->
         <activity
             android:name=".activities.OtpActivity"
             android:exported="true" />
@@ -35,6 +34,9 @@
             android:exported="true" />
         <activity
             android:name=".activities.ForgotPasswordActivity"
+            android:exported="true" />
+        <activity
+            android:name=".activities.ResetPasswordActivity"
             android:exported="true" />
     </application>
 

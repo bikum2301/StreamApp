@@ -4,7 +4,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
-    private static final String BASE_URL = "http://192.168.1.19:5000/"; // Sử dụng 10.0.2.2 để kết nối localhost từ Android Emulator
+    private static final String BASE_URL = "http://192.168.1.145:5000/"; // Sử dụng 10.0.2.2 để kết nối localhost từ Android Emulator
     private static Retrofit retrofit = null;
 
     public static ApiService getApiService() {

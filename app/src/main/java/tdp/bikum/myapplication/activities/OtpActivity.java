@@ -1,11 +1,15 @@
 package tdp.bikum.myapplication.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.io.IOException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -14,7 +18,7 @@ import tdp.bikum.myapplication.R;
 import tdp.bikum.myapplication.api.ApiService;
 import tdp.bikum.myapplication.api.RetrofitClient;
 import tdp.bikum.myapplication.databinding.ActivityOtpBinding;
-import tdp.bikum.myapplication.models.OtpRequest;
+import tdp.bikum.myapplication.models.OtpVerificationRequest;
 import tdp.bikum.myapplication.models.SendOtpRequest;
 import tdp.bikum.myapplication.models.User;
 
@@ -41,7 +45,6 @@ public class OtpActivity extends AppCompatActivity {
         binding.btnVerifyOtp.setOnClickListener(v -> verifyOtp());
 
         // Xử lý sự kiện khi nhấn nút Gửi lại OTP
-        binding.btnResendOtp.setOnClickListener(v -> resendOtp());
     }
 
     private void startTimer() {
@@ -69,26 +72,37 @@ public class OtpActivity extends AppCompatActivity {
 
         binding.progressBar.setVisibility(View.VISIBLE);
 
-        // Gọi API xác thực OTP
-        OtpRequest otpRequest = new OtpRequest(email, otp);
+        // Sử dụng OtpVerificationRequest
+        OtpVerificationRequest otpVerificationRequest = new OtpVerificationRequest(email, otp);
         ApiService apiService = RetrofitClient.getApiService();
-        Call<Void> call = apiService.verifyOtp(otpRequest);
+        Call<Void> call = apiService.verifyOtp(otpVerificationRequest);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 binding.progressBar.setVisibility(View.GONE);
 
                 if (response.isSuccessful()) {
-                    // Xác thực thành công, đăng ký tài khoản
-                    registerUser();
+                    // Xác thực thành công, chuyển sang màn hình đăng nhập
+                    Toast.makeText(OtpActivity.this, "Xác thực thành công!", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(OtpActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                    finish(); // Đóng OtpActivity
                 } else {
-                    Toast.makeText(OtpActivity.this, "Xác thực OTP thất bại: " + response.message(), Toast.LENGTH_SHORT).show();
+                    // Xử lý lỗi từ server
+                    try {
+                        String errorBody = response.errorBody().string();
+                        Log.e("OtpActivity", "Lỗi: " + errorBody);
+                        Toast.makeText(OtpActivity.this, "Xác thực OTP thất bại: " + errorBody, Toast.LENGTH_SHORT).show();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 binding.progressBar.setVisibility(View.GONE);
+                Log.e("OtpActivity", "Lỗi kết nối: " + t.getMessage());
                 Toast.makeText(OtpActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
@@ -116,33 +130,6 @@ public class OtpActivity extends AppCompatActivity {
         });
     }
 
-    private void resendOtp() {
-        binding.progressBar.setVisibility(View.VISIBLE);
-
-        // Gọi API gửi lại mã OTP
-        SendOtpRequest sendOtpRequest = new SendOtpRequest(email);
-        ApiService apiService = RetrofitClient.getApiService();
-        Call<Void> call = apiService.sendOtp(sendOtpRequest);
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                binding.progressBar.setVisibility(View.GONE);
-
-                if (response.isSuccessful()) {
-                    Toast.makeText(OtpActivity.this, "Đã gửi lại mã OTP", Toast.LENGTH_SHORT).show();
-                    startTimer(); // Bắt đầu lại đếm ngược
-                } else {
-                    Toast.makeText(OtpActivity.this, "Gửi lại mã OTP thất bại: " + response.message(), Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                binding.progressBar.setVisibility(View.GONE);
-                Toast.makeText(OtpActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
 
     @Override
     protected void onDestroy() {

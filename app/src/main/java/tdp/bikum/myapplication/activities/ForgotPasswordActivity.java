@@ -1,5 +1,6 @@
 package tdp.bikum.myapplication.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -48,7 +49,10 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 binding.progressBar.setVisibility(View.GONE);
 
                 if (response.isSuccessful()) {
-                    Toast.makeText(ForgotPasswordActivity.this, "Yêu cầu đã được gửi! Vui lòng kiểm tra email.", Toast.LENGTH_SHORT).show();
+                    // Chuyển sang ResetPasswordActivity và truyền email
+                    Intent intent = new Intent(ForgotPasswordActivity.this, ResetPasswordActivity.class);
+                    intent.putExtra("email", email); // Truyền email qua Intent
+                    startActivity(intent);
                 } else {
                     Toast.makeText(ForgotPasswordActivity.this, "Gửi yêu cầu thất bại: " + response.message(), Toast.LENGTH_SHORT).show();
                 }
