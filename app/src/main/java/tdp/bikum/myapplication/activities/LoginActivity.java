@@ -1,5 +1,6 @@
 package tdp.bikum.myapplication.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -27,6 +28,12 @@ public class LoginActivity extends AppCompatActivity {
 
         // Xử lý sự kiện khi nhấn nút Đăng nhập
         binding.btnLogin.setOnClickListener(v -> loginUser());
+
+        // Xử lý sự kiện khi nhấn nút Quên mật khẩu
+        binding.btnForgotPassword.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void loginUser() {

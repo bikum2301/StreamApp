@@ -26,8 +26,7 @@
     <color name="yellow_700">#FBC02D</color>
 
     <!-- Màu gradient phổ biến -->
-    <color name="gradient_start">#FF6F00</color>
-    <color name="gradient_end">#FFC400</color>
+
     <color name="gradient_blue_start">#00BCD4</color>
     <color name="gradient_blue_end">#3F51B5</color>
     <color name="gradient_purple_start">#9C27B0</color>
@@ -43,4 +42,9 @@
     <color name="vibrant_orange">#FF6F00</color>
     <color name="vibrant_purple">#8A2BE2</color>
     <color name="vibrant_teal">#00CED1</color>
+
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorSecondary">#03DAC5</color>
+    <color name="gradient_start">#A8D8EA</color> <!-- Màu xanh dương nhạt -->
+    <color name="gradient_end">#C6E2FF</color>  <!-- Màu xanh dương nhạt hơn -->
 </resources>

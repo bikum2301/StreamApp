@@ -1,11 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    tools:context=".activities.LoginActivity">
+    android:padding="16dp">
 
     <!-- Email Input -->
     <com.google.android.material.textfield.TextInputLayout
@@ -28,7 +26,7 @@
             android:inputType="textEmailAddress" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Password Input -->
+    <!-- Password Input với tính năng hiển thị mật khẩu -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/passwordInputLayout"
         android:layout_width="0dp"
@@ -39,18 +37,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:boxStrokeWidth="1dp"
         app:boxStrokeColor="@color/black"
-        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CustomTextInputLayout">
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CustomTextInputLayout"
+        app:endIconMode="password_toggle">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password"
+            android:hint="Mật khẩu"
             android:inputType="textPassword" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Login Button -->
-    <Button
+    <!-- Button Đăng nhập -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnLogin"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -58,17 +57,39 @@
         android:layout_marginTop="32dp"
         android:backgroundTint="@color/purple_500"
         android:textColor="@color/white"
+        android:elevation="4dp"
+        android:drawablePadding="8dp"
+        app:cornerRadius="8dp"
+        app:rippleColor="@color/white"
         app:layout_constraintTop_toBottomOf="@id/passwordInputLayout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.8" />
 
-    <!-- ProgressBar -->
+    <!-- Button Quên mật khẩu -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnForgotPassword"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Quên mật khẩu"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/teal_700"
+        android:textColor="@color/white"
+        android:elevation="4dp"
+        app:cornerRadius="8dp"
+        app:rippleColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/btnLogin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.8" />
+
+    <!-- Button Quên mật khẩu -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/btnLogin"
+        app:layout_constraintTop_toBottomOf="@id/btnForgotPassword"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />

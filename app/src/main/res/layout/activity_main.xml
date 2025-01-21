@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
     tools:context=".activities.MainActivity">
 
     <!-- Welcome Text -->
@@ -15,51 +15,56 @@
         android:text="Chào mừng bạn đến với ứng dụng!"
         android:textSize="24sp"
         android:textStyle="bold"
+        android:textColor="@color/white"
+        android:fontFamily="@font/roboto_condensed"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="50dp"/>
+        android:layout_marginTop="100dp"/>
 
-    <!-- Register Button -->
-    <Button
-        android:id="@+id/btnGoToRegister"
+    <!-- Phần chứa 2 button, đặt xuống dưới cùng -->
+    <LinearLayout
+        android:id="@+id/buttonContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Đăng ký"
-        android:layout_marginTop="30dp"
-        android:backgroundTint="@color/purple_500"
-        android:textColor="@color/white"
-        app:layout_constraintTop_toBottomOf="@id/tvWelcome"
+        android:orientation="horizontal"
+        android:background="@drawable/rounded_button_background"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintWidth_percent="0.6"/>
+        app:layout_constraintWidth_percent="0.9"
+        android:layout_marginBottom="32dp">
 
-    <!-- Login Button -->
-    <Button
-        android:id="@+id/btnGoToLogin"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Đăng nhập"
-        android:layout_marginTop="20dp"
-        android:backgroundTint="@color/purple_500"
-        android:textColor="@color/white"
-        app:layout_constraintTop_toBottomOf="@id/btnGoToRegister"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintWidth_percent="0.6"/>
+        <!-- Button Đăng ký -->
+        <Button
+            android:id="@+id/btnGoToRegister"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:text="Đăng ký"
+            android:layout_weight="1"
+            android:background="@drawable/rounded_left_button"
+            android:textColor="@color/white"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:padding="8dp"
+        android:elevation="4dp"
+        android:stateListAnimator="@null"/>
 
-    <!-- Forgot Password Button -->
-    <Button
-        android:id="@+id/btnGoToForgotPassword"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Quên mật khẩu"
-        android:layout_marginTop="20dp"
-        android:backgroundTint="@color/purple_500"
-        android:textColor="@color/white"
-        app:layout_constraintTop_toBottomOf="@id/btnGoToLogin"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintWidth_percent="0.6"/>
+        <!-- Button Đăng nhập -->
+        <Button
+            android:id="@+id/btnGoToLogin"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:text="Đăng nhập"
+            android:layout_weight="1"
+            android:background="@drawable/rounded_right_button"
+            android:textColor="@color/white"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:padding="8dp"
+        android:elevation="4dp"
+        android:stateListAnimator="@null"/>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
