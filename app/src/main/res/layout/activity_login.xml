@@ -5,9 +5,9 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <!-- Email Input -->
+    <!-- Username or Email Input -->
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/emailInputLayout"
+        android:id="@+id/usernameOrEmailInputLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
@@ -19,11 +19,11 @@
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CustomTextInputLayout">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etEmail"
+            android:id="@+id/etUsernameOrEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Email"
-            android:inputType="textEmailAddress" />
+            android:hint="Username or Email"
+            android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Password Input với tính năng hiển thị mật khẩu -->
@@ -32,7 +32,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/emailInputLayout"
+        app:layout_constraintTop_toBottomOf="@id/usernameOrEmailInputLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:boxStrokeWidth="1dp"
@@ -66,32 +66,45 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintWidth_percent="0.8" />
 
-    <!-- Button Quên mật khẩu -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnForgotPassword"
-        android:layout_width="0dp"
+    <!-- TextView "Quên mật khẩu" -->
+    <TextView
+        android:id="@+id/tvForgotPassword"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Quên mật khẩu"
+        android:text="Quên mật khẩu?"
+        android:textColor="@color/purple_500"
+        android:textStyle="bold"
         android:layout_marginTop="16dp"
-        android:backgroundTint="@color/teal_700"
-        android:textColor="@color/white"
-        android:elevation="4dp"
-        app:cornerRadius="8dp"
-        app:rippleColor="@color/white"
+        android:layout_marginEnd="16dp"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_constraintTop_toBottomOf="@id/btnLogin"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintWidth_percent="0.8" />
+        app:layout_constraintEnd_toEndOf="@id/btnLogin" />
 
-    <!-- Button Quên mật khẩu -->
+    <!-- ProgressBar -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/btnForgotPassword"
+        app:layout_constraintTop_toBottomOf="@id/tvForgotPassword"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
+
+    <!-- TextView "Chưa có tài khoản? Đăng ký ngay" -->
+    <TextView
+        android:id="@+id/tvSignUp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chưa có tài khoản? Đăng ký ngay"
+        android:textColor="@color/purple_500"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/progressBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:clickable="true"
+        android:focusable="true"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

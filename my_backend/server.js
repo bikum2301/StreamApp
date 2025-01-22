@@ -39,28 +39,59 @@ const transporter = nodemailer.createTransport({
 
 // API Đăng ký
 app.post('/api/register', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, fullname, username } = req.body;
+
+    // Kiểm tra xem các trường bắt buộc có được gửi lên không
+    if (!email || !password || !fullname || !username) {
+        return res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin' });
+    }
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Tạo OTP 6 chữ số
 
-    const sql = 'INSERT INTO users (email, password, otp) VALUES (?, ?, ?)';
-    db.query(sql, [email, password, otp], (err, result) => {
+    // Kiểm tra xem email đã tồn tại chưa
+    const checkEmailSql = 'SELECT * FROM users WHERE email = ?';
+    db.query(checkEmailSql, [email], (err, emailResults) => {
         if (err) {
             return res.status(500).json({ message: 'Đăng ký thất bại', error: err.message });
         }
 
-        // Gửi OTP qua email
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: 'Xác thực OTP',
-            text: `Mã OTP của bạn là: ${otp}`,
-        };
+        if (emailResults.length > 0) {
+            return res.status(400).json({ message: 'Email đã tồn tại' });
+        }
 
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                return res.status(500).json({ message: 'Gửi OTP thất bại' });
+        // Kiểm tra xem username đã tồn tại chưa
+        const checkUsernameSql = 'SELECT * FROM users WHERE username = ?';
+        db.query(checkUsernameSql, [username], (err, usernameResults) => {
+            if (err) {
+                return res.status(500).json({ message: 'Đăng ký thất bại', error: err.message });
             }
-            res.status(200).json({ message: 'OTP đã được gửi qua email' });
+
+            if (usernameResults.length > 0) {
+                return res.status(400).json({ message: 'Username đã tồn tại' });
+            }
+
+            // Nếu email và username chưa tồn tại, tiếp tục đăng ký
+            const sql = 'INSERT INTO users (email, password, fullname, username, otp) VALUES (?, ?, ?, ?, ?)';
+            db.query(sql, [email, password, fullname, username, otp], (err, result) => {
+                if (err) {
+                    return res.status(500).json({ message: 'Đăng ký thất bại', error: err.message });
+                }
+
+                // Gửi OTP qua email
+                const mailOptions = {
+                    from: process.env.EMAIL_USER,
+                    to: email,
+                    subject: 'Xác thực OTP',
+                    text: `Mã OTP của bạn là: ${otp}`,
+                };
+
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        return res.status(500).json({ message: 'Gửi OTP thất bại' });
+                    }
+                    res.status(200).json({ message: 'OTP đã được gửi qua email' });
+                });
+            });
         });
     });
 });
@@ -81,7 +112,15 @@ app.post('/api/verify-otp', async (req, res) => {
                 if (err) {
                     return res.status(500).json({ message: 'Xác thực thất bại', error: err.message });
                 }
-                res.status(200).json({ message: 'Xác thực thành công' });
+                const user = results[0];
+                res.status(200).json({
+                    message: 'Xác thực thành công',
+                    user: {
+                        email: user.email,
+                        fullname: user.fullname,
+                        username: user.username,
+                    },
+                });
             });
         } else {
             res.status(400).json({ message: 'OTP không hợp lệ' });
@@ -91,10 +130,17 @@ app.post('/api/verify-otp', async (req, res) => {
 
 // API Đăng nhập
 app.post('/api/login', async (req, res) => {
-    const { email, password } = req.body;
+    const { usernameOrEmail, password } = req.body;
 
-    const sql = 'SELECT * FROM users WHERE email = ? AND password = ?';
-    db.query(sql, [email, password], (err, results) => {
+    // Kiểm tra xem usernameOrEmail là email hay username
+    const isEmail = usernameOrEmail.includes('@');
+
+    // Xây dựng câu truy vấn SQL
+    const sql = isEmail
+        ? 'SELECT * FROM users WHERE email = ? AND password = ?'
+        : 'SELECT * FROM users WHERE username = ? AND password = ?';
+
+    db.query(sql, [usernameOrEmail, password], (err, results) => {
         if (err) {
             return res.status(500).json({ message: 'Đăng nhập thất bại', error: err.message });
         }
@@ -102,12 +148,19 @@ app.post('/api/login', async (req, res) => {
         if (results.length > 0) {
             const user = results[0];
             if (user.isVerified) {
-                res.status(200).json({ message: 'Đăng nhập thành công' });
+                res.status(200).json({
+                    message: 'Đăng nhập thành công',
+                    user: {
+                        email: user.email,
+                        fullname: user.fullname,
+                        username: user.username,
+                    },
+                });
             } else {
                 res.status(400).json({ message: 'Tài khoản chưa được xác thực' });
             }
         } else {
-            res.status(400).json({ message: 'Email hoặc mật khẩu không đúng' });
+            res.status(400).json({ message: 'Tên đăng nhập/email hoặc mật khẩu không đúng' });
         }
     });
 });

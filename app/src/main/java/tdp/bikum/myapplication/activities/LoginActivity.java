@@ -14,7 +14,7 @@ import tdp.bikum.myapplication.R;
 import tdp.bikum.myapplication.api.ApiService;
 import tdp.bikum.myapplication.api.RetrofitClient;
 import tdp.bikum.myapplication.databinding.ActivityLoginBinding;
-import tdp.bikum.myapplication.models.User;
+import tdp.bikum.myapplication.models.LoginRequest;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -29,27 +29,36 @@ public class LoginActivity extends AppCompatActivity {
         // Xử lý sự kiện khi nhấn nút Đăng nhập
         binding.btnLogin.setOnClickListener(v -> loginUser());
 
-        // Xử lý sự kiện khi nhấn nút Quên mật khẩu
-        binding.btnForgotPassword.setOnClickListener(v -> {
+        // Xử lý sự kiện khi nhấn TextView "Quên mật khẩu?"
+        binding.tvForgotPassword.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+            startActivity(intent);
+        });
+
+        // Xử lý sự kiện khi nhấn TextView "Chưa có tài khoản? Đăng ký ngay"
+        binding.tvSignUp.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
         });
     }
 
     private void loginUser() {
-        String email = binding.etEmail.getText().toString().trim();
+        String usernameOrEmail = binding.etUsernameOrEmail.getText().toString().trim();
         String password = binding.etPassword.getText().toString().trim();
 
-        if (email.isEmpty() || password.isEmpty()) {
+        if (usernameOrEmail.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show();
             return;
         }
 
         binding.progressBar.setVisibility(View.VISIBLE);
 
-        User user = new User(email, password);
+        // Tạo đối tượng LoginRequest
+        LoginRequest loginRequest = new LoginRequest(usernameOrEmail, password);
+
+        // Gọi API đăng nhập
         ApiService apiService = RetrofitClient.getApiService();
-        Call<Void> call = apiService.login(user);
+        Call<Void> call = apiService.login(loginRequest);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {

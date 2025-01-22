@@ -22,7 +22,6 @@ import tdp.bikum.myapplication.R;
 import tdp.bikum.myapplication.api.ApiService;
 import tdp.bikum.myapplication.api.RetrofitClient;
 import tdp.bikum.myapplication.databinding.ActivityRegisterBinding;
-import tdp.bikum.myapplication.models.SendOtpRequest;
 import tdp.bikum.myapplication.models.User;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -48,6 +47,13 @@ public class RegisterActivity extends AppCompatActivity {
             binding.etPassword.setSelection(binding.etPassword.getText().length());
         });
 
+        // Xử lý sự kiện khi nhấn TextView "Already have an account? Login"
+        binding.tvLogin.setOnClickListener(v -> {
+            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish(); // Đóng màn hình đăng ký sau khi chuyển sang đăng nhập
+        });
+
         // Xử lý padding cho hệ thống thanh điều hướng
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -59,8 +65,11 @@ public class RegisterActivity extends AppCompatActivity {
     private void registerUser() {
         String email = binding.etEmail.getText().toString().trim();
         String password = binding.etPassword.getText().toString().trim();
+        String fullname = binding.etFullname.getText().toString().trim();
+        String username = binding.etUsername.getText().toString().trim(); // Lấy giá trị username
 
-        if (email.isEmpty() || password.isEmpty()) {
+        // Kiểm tra các trường bắt buộc
+        if (email.isEmpty() || password.isEmpty() || fullname.isEmpty() || username.isEmpty()) {
             Toast.makeText(this, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -72,8 +81,8 @@ public class RegisterActivity extends AppCompatActivity {
 
         binding.progressBar.setVisibility(View.VISIBLE);
 
-        // Tạo đối tượng User để gửi lên server
-        User user = new User(email, password);
+        // Tạo đối tượng User với fullname và username
+        User user = new User(email, password, fullname, username, null);
         ApiService apiService = RetrofitClient.getApiService();
         Call<Void> call = apiService.register(user);
         call.enqueue(new Callback<Void>() {
