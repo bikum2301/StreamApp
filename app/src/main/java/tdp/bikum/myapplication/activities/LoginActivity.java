@@ -66,6 +66,13 @@ public class LoginActivity extends AppCompatActivity {
 
                 if (response.isSuccessful()) {
                     Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+
+                    // Chuyển sang MusicPlayerActivity
+                    Intent intent = new Intent(LoginActivity.this, MusicPlayerActivity.class);
+                    startActivity(intent);
+
+                    // Kết thúc LoginActivity để ngăn người dùng quay lại bằng nút back
+                    finish();
                 } else {
                     Toast.makeText(LoginActivity.this, "Đăng nhập thất bại: " + response.message(), Toast.LENGTH_SHORT).show();
                 }

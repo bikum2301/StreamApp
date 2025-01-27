@@ -1,8 +1,14 @@
 package tdp.bikum.myapplication.api;
 
+import java.util.List;
+
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import tdp.bikum.myapplication.models.Album;
 import tdp.bikum.myapplication.models.LoginRequest;
 import tdp.bikum.myapplication.models.OtpResetPasswordRequest;
 import tdp.bikum.myapplication.models.OtpVerificationRequest;
+import tdp.bikum.myapplication.models.Song;
 import tdp.bikum.myapplication.models.User;
 import tdp.bikum.myapplication.models.SendOtpRequest;
 
@@ -28,4 +34,18 @@ public interface ApiService {
 
     @POST("/api/send-otp")
     Call<Void> sendOtp(@Body SendOtpRequest sendOtpRequest);
+    @GET("songs")
+    Call<List<Song>> getSongs();
+
+    // Lấy danh sách album
+    @GET("albums")
+    Call<List<Album>> getAlbums();
+
+    // Tạo album mới
+    @POST("albums")
+    Call<Album> createAlbum(@Body Album album);
+
+    // Thêm bài hát vào album
+    @POST("albums/{albumId}/songs")
+    Call<Album> addSongToAlbum(@Path("albumId") String albumId, @Body Song song);
 }
