@@ -25,14 +25,37 @@ import tdp.bikum.myapplication.models.Song;
 public class PlayerFragment extends Fragment implements OnSongClickListener {
     private SimpleExoPlayer player;
     private TextView songTitleTextView, songArtistTextView;
+    private TextView currentTimeTextView, totalTimeTextView;
     private SeekBar seekBar;
-    private ImageButton playPauseButton, rewindButton, nextButton;
+    private ImageButton playPauseButton, previousButton, nextButton, shuffleButton, repeatButton;
     private List<Song> songList;
     private int currentPosition = 0;
 
+    @Nullable
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_player, container, false);
+
+        // Initialize TextViews
+        songTitleTextView = view.findViewById(R.id.songTitleTextView);
+        songArtistTextView = view.findViewById(R.id.songArtistTextView);
+        currentTimeTextView = view.findViewById(R.id.currentTimeTextView);
+        totalTimeTextView = view.findViewById(R.id.totalTimeTextView);
+
+        // Initialize SeekBar
+        seekBar = view.findViewById(R.id.seekBar);
+
+        // Initialize Buttons
+        playPauseButton = view.findViewById(R.id.playPauseButton);
+        previousButton = view.findViewById(R.id.previousButton);
+        nextButton = view.findViewById(R.id.nextButton);
+        shuffleButton = view.findViewById(R.id.shuffleButton);
+        repeatButton = view.findViewById(R.id.repeatButton);
+
+        setupPlayer();
+        setupListeners();
+
+        // Play the initial song if arguments are passed
         if (getArguments() != null) {
             songList = getArguments().getParcelableArrayList("songList");
             String currentSongPath = getArguments().getString("currentSongPath");
@@ -42,27 +65,12 @@ public class PlayerFragment extends Fragment implements OnSongClickListener {
                 for (int i = 0; i < songList.size(); i++) {
                     if (songList.get(i).getPath().equals(currentSongPath)) {
                         currentPosition = i;
+                        playSong(songList.get(currentPosition));
                         break;
                     }
                 }
             }
         }
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_player, container, false);
-
-        songTitleTextView = view.findViewById(R.id.songTitleTextView);
-        songArtistTextView = view.findViewById(R.id.songArtistTextView);
-        seekBar = view.findViewById(R.id.seekBar);
-        playPauseButton = view.findViewById(R.id.playPauseButton);
-        rewindButton = view.findViewById(R.id.rewindButton);
-        nextButton = view.findViewById(R.id.nextButton);
-
-        setupPlayer();
-        setupListeners();
 
         return view;
     }
@@ -94,8 +102,7 @@ public class PlayerFragment extends Fragment implements OnSongClickListener {
             }
         });
 
-        rewindButton.setOnClickListener(v -> player.seekTo(player.getCurrentPosition() - 10000));
-
+        previousButton.setOnClickListener(v -> playPreviousSong());
         nextButton.setOnClickListener(v -> playNextSong());
     }
 
@@ -115,8 +122,13 @@ public class PlayerFragment extends Fragment implements OnSongClickListener {
         player.prepare();
         player.play();
 
+        // Update UI
         songTitleTextView.setText(song.getTitle());
         songArtistTextView.setText(song.getArtist());
+
+        // Update total time
+        totalTimeTextView.setText(formatTime(song.getDuration()));
+
         playPauseButton.setImageResource(android.R.drawable.ic_media_pause);
     }
 
@@ -125,6 +137,20 @@ public class PlayerFragment extends Fragment implements OnSongClickListener {
             currentPosition = (currentPosition + 1) % songList.size();
             playSong(songList.get(currentPosition));
         }
+    }
+
+    private void playPreviousSong() {
+        if (songList != null && !songList.isEmpty()) {
+            currentPosition = (currentPosition - 1 + songList.size()) % songList.size();
+            playSong(songList.get(currentPosition));
+        }
+    }
+
+    private String formatTime(long milliseconds) {
+        long seconds = milliseconds / 1000;
+        long minutes = seconds / 60;
+        seconds = seconds % 60;
+        return String.format("%d:%02d", minutes, seconds);
     }
 
     @Override
