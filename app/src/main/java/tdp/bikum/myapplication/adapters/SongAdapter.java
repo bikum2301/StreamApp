@@ -12,28 +12,40 @@ import tdp.bikum.myapplication.models.Song;
 
 import java.util.List;
 
-public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
-
+public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder> {
     private Context context;
     private List<Song> songList;
+    private OnSongClickListener listener;
+
+    public interface OnSongClickListener {
+        void onSongClick(Song song);
+    }
+    public void setOnSongClickListener(OnSongClickListener listener) {
+        this.listener = listener;
+    }
 
     public SongAdapter(Context context, List<Song> songList) {
         this.context = context;
         this.songList = songList;
     }
 
-    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public SongViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_song, parent, false);
-        return new ViewHolder(view);
+        return new SongViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(SongViewHolder holder, int position) {
         Song song = songList.get(position);
-        holder.textViewTitle.setText(song.getTitle());
-        holder.textViewArtist.setText(song.getArtist());
+        holder.titleTextView.setText(song.getTitle());
+        holder.artistTextView.setText(song.getArtist());
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onSongClick(song);
+            }
+        });
     }
 
     @Override
@@ -41,13 +53,13 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
         return songList.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView textViewTitle, textViewArtist;
+    public static class SongViewHolder extends RecyclerView.ViewHolder {
+        TextView titleTextView, artistTextView;
 
-        public ViewHolder(@NonNull View itemView) {
+        public SongViewHolder(View itemView) {
             super(itemView);
-            textViewTitle = itemView.findViewById(R.id.textViewTitle);
-            textViewArtist = itemView.findViewById(R.id.textViewArtist);
+            titleTextView = itemView.findViewById(R.id.titleTextView);
+            artistTextView = itemView.findViewById(R.id.artistTextView);
         }
     }
 }

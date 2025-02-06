@@ -1,32 +1,60 @@
 package tdp.bikum.myapplication.models;
 
-public class Song {
-    private String id;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
+
+public class Song implements Parcelable {
     private String title;
     private String artist;
     private String path;
+    private long duration;
 
-    // Constructor, getters, and setters
-    public Song(String id, String title, String artist, String path) {
-        this.id = id;
+    // Constructor
+    public Song(String title, String artist, String path, long duration) {
         this.title = title;
         this.artist = artist;
         this.path = path;
+        this.duration = duration;
     }
 
-    public String getId() {
-        return id;
+    // Parcelable implementation
+    protected Song(Parcel in) {
+        title = in.readString();
+        artist = in.readString();
+        path = in.readString();
+        duration = in.readLong();
     }
 
-    public String getTitle() {
-        return title;
+    public static final Creator<Song> CREATOR = new Creator<Song>() {
+        @Override
+        public Song createFromParcel(Parcel in) {
+            return new Song(in);
+        }
+
+        @Override
+        public Song[] newArray(int size) {
+            return new Song[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public String getArtist() {
-        return artist;
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeString(title);
+        dest.writeString(artist);
+        dest.writeString(path);
+        dest.writeLong(duration);
     }
 
-    public String getPath() {
-        return path;
-    }
+    // Getters
+    public String getTitle() { return title; }
+    public String getArtist() { return artist; }
+    public String getPath() { return path; }
+    public long getDuration() { return duration; }
 }
