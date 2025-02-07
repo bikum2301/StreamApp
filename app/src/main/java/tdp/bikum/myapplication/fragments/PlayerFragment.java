@@ -1,7 +1,13 @@
 package tdp.bikum.myapplication.fragments;
 
-import android.net.Uri;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,136 +19,188 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.Player;
 
 import java.util.List;
+import java.util.Locale;
 
 import tdp.bikum.myapplication.R;
 import tdp.bikum.myapplication.interfaces.OnSongClickListener;
 import tdp.bikum.myapplication.models.Song;
+import tdp.bikum.myapplication.services.MusicService;
 
 public class PlayerFragment extends Fragment implements OnSongClickListener {
-    private SimpleExoPlayer player;
+    private ExoPlayer player;
     private TextView songTitleTextView, songArtistTextView;
     private TextView currentTimeTextView, totalTimeTextView;
     private SeekBar seekBar;
-    private ImageButton playPauseButton, previousButton, nextButton, shuffleButton, repeatButton;
+    private ImageButton playPauseButton, previousButton, nextButton;
     private List<Song> songList;
     private int currentPosition = 0;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private boolean isDragging = false;
+    private MusicService musicService;
+    private boolean isBound = false;
+
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MusicService.LocalBinder binder = (MusicService.LocalBinder) service;
+            musicService = binder.getService();
+            player = musicService.getPlayer();
+            isBound = true;
+            if (player != null) {
+                setupPlayer();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            isBound = false;
+            player = null;
+        }
+    };
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Bind to MusicService
+        Intent intent = new Intent(getContext(), MusicService.class);
+        requireActivity().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_player, container, false);
+        initializeViews(view);
+        setupListeners();
+        return view;
+    }
 
-        // Initialize TextViews
+    private void initializeViews(View view) {
         songTitleTextView = view.findViewById(R.id.songTitleTextView);
         songArtistTextView = view.findViewById(R.id.songArtistTextView);
         currentTimeTextView = view.findViewById(R.id.currentTimeTextView);
         totalTimeTextView = view.findViewById(R.id.totalTimeTextView);
-
-        // Initialize SeekBar
         seekBar = view.findViewById(R.id.seekBar);
-
-        // Initialize Buttons
         playPauseButton = view.findViewById(R.id.playPauseButton);
         previousButton = view.findViewById(R.id.previousButton);
         nextButton = view.findViewById(R.id.nextButton);
-        shuffleButton = view.findViewById(R.id.shuffleButton);
-        repeatButton = view.findViewById(R.id.repeatButton);
-
-        setupPlayer();
-        setupListeners();
-
-        // Play the initial song if arguments are passed
-        if (getArguments() != null) {
-            songList = getArguments().getParcelableArrayList("songList");
-            String currentSongPath = getArguments().getString("currentSongPath");
-
-            // Find current song position
-            if (songList != null) {
-                for (int i = 0; i < songList.size(); i++) {
-                    if (songList.get(i).getPath().equals(currentSongPath)) {
-                        currentPosition = i;
-                        playSong(songList.get(currentPosition));
-                        break;
-                    }
-                }
-            }
-        }
-
-        return view;
     }
 
     private void setupPlayer() {
-        player = new SimpleExoPlayer.Builder(requireContext()).build();
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        if (player == null) return;
+
+        player.addListener(new Player.Listener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) player.seekTo(progress);
+            public void onPlaybackStateChanged(int playbackState) {
+                if (playbackState == Player.STATE_READY) {
+                    seekBar.setMax((int) player.getDuration());
+                    totalTimeTextView.setText(formatTime(player.getDuration()));
+                    startProgressUpdate();
+                } else if (playbackState == Player.STATE_ENDED) {
+                    playNextSong();
+                }
             }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
     }
 
     private void setupListeners() {
-        playPauseButton.setOnClickListener(v -> {
-            if (player.isPlaying()) {
-                player.pause();
-                playPauseButton.setImageResource(android.R.drawable.ic_media_play);
-            } else {
-                player.play();
-                playPauseButton.setImageResource(android.R.drawable.ic_media_pause);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && player != null) {
+                    player.seekTo(progress);
+                    currentTimeTextView.setText(formatTime(progress));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                isDragging = true;
+                handler.removeCallbacks(updateProgressRunnable);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                isDragging = false;
+                if (player != null) {
+                    player.seekTo(seekBar.getProgress());
+                    startProgressUpdate();
+                }
             }
         });
 
+        playPauseButton.setOnClickListener(v -> togglePlayPause());
         previousButton.setOnClickListener(v -> playPreviousSong());
         nextButton.setOnClickListener(v -> playNextSong());
     }
 
-    @Override
-    public void onSongClick(Song song) {
-        playSong(song);
+    private final Runnable updateProgressRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (player != null && !isDragging && player.isPlaying()) {
+                long currentPosition = player.getCurrentPosition();
+                seekBar.setProgress((int) currentPosition);
+                currentTimeTextView.setText(formatTime(currentPosition));
+                handler.postDelayed(this, 500);
+            }
+        }
+    };
+
+    private void startProgressUpdate() {
+        handler.removeCallbacks(updateProgressRunnable);
+        handler.post(updateProgressRunnable);
     }
 
-    private void playSong(Song song) {
+    private void togglePlayPause() {
         if (player != null) {
-            player.release();
+            if (player.isPlaying()) {
+                player.pause();
+                playPauseButton.setImageResource(R.drawable.ic_play);
+            } else {
+                player.play();
+                playPauseButton.setImageResource(R.drawable.ic_pause);
+                startProgressUpdate();
+            }
         }
+    }
 
-        player = new SimpleExoPlayer.Builder(requireContext()).build();
-        MediaItem mediaItem = MediaItem.fromUri(Uri.parse(song.getPath()));
-        player.setMediaItem(mediaItem);
-        player.prepare();
-        player.play();
+    @Override
+    public void onSongClick(Song song) {
+        if (musicService != null) {
+            musicService.playSong(song);
+            updateUI(song);
+        }
+    }
 
-        // Update UI
+    private void updateUI(Song song) {
         songTitleTextView.setText(song.getTitle());
         songArtistTextView.setText(song.getArtist());
-
-        // Update total time
-        totalTimeTextView.setText(formatTime(song.getDuration()));
-
-        playPauseButton.setImageResource(android.R.drawable.ic_media_pause);
+        playPauseButton.setImageResource(R.drawable.ic_pause);
     }
 
     private void playNextSong() {
         if (songList != null && !songList.isEmpty()) {
             currentPosition = (currentPosition + 1) % songList.size();
-            playSong(songList.get(currentPosition));
+            Song nextSong = songList.get(currentPosition);
+            if (musicService != null) {
+                musicService.playSong(nextSong);
+                updateUI(nextSong);
+            }
         }
     }
 
     private void playPreviousSong() {
         if (songList != null && !songList.isEmpty()) {
             currentPosition = (currentPosition - 1 + songList.size()) % songList.size();
-            playSong(songList.get(currentPosition));
+            Song prevSong = songList.get(currentPosition);
+            if (musicService != null) {
+                musicService.playSong(prevSong);
+                updateUI(prevSong);
+            }
         }
     }
 
@@ -150,14 +208,16 @@ public class PlayerFragment extends Fragment implements OnSongClickListener {
         long seconds = milliseconds / 1000;
         long minutes = seconds / 60;
         seconds = seconds % 60;
-        return String.format("%d:%02d", minutes, seconds);
+        return String.format(Locale.getDefault(), "%d:%02d", minutes, seconds);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (player != null) {
-            player.release();
+        handler.removeCallbacks(updateProgressRunnable);
+        if (isBound) {
+            requireActivity().unbindService(serviceConnection);
+            isBound = false;
         }
     }
 }
