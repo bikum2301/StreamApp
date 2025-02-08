@@ -6,6 +6,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 import tdp.bikum.myapplication.models.Album;
 import tdp.bikum.myapplication.models.LoginRequest;
+import tdp.bikum.myapplication.models.Lyrics;
 import tdp.bikum.myapplication.models.OtpResetPasswordRequest;
 import tdp.bikum.myapplication.models.OtpVerificationRequest;
 import tdp.bikum.myapplication.models.Song;
@@ -48,4 +49,7 @@ public interface ApiService {
     // Thêm bài hát vào album
     @POST("albums/{albumId}/songs")
     Call<Album> addSongToAlbum(@Path("albumId") String albumId, @Body Song song);
+
+    @GET("lyrics/{songId}")
+    Call<Lyrics> getLyrics(@Path("songId") String songId);
 }
