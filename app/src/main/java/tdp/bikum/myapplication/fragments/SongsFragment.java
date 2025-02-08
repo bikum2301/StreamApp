@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,6 +14,9 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -22,6 +26,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import tdp.bikum.myapplication.R;
+import tdp.bikum.myapplication.activities.LoginActivity;
 import tdp.bikum.myapplication.adapters.SongAdapter;
 import tdp.bikum.myapplication.api.ApiService;
 import tdp.bikum.myapplication.api.RetrofitClient;
@@ -38,6 +43,7 @@ public class SongsFragment extends Fragment {
     private List<Song> songList = new ArrayList<>();
     private MusicService musicService;
     private boolean isBound = false;
+    private SharedPreferences sharedPreferences;
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -69,7 +75,7 @@ public class SongsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_songs, container, false);
         recyclerView = view.findViewById(R.id.recyclerViewSongs);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
+        sharedPreferences = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         songAdapter = new SongAdapter(getContext(), songList);
         songAdapter.setOnSongClickListener(song -> {
             if (musicService != null) {
@@ -93,8 +99,39 @@ public class SongsFragment extends Fragment {
 
         recyclerView.setAdapter(songAdapter);
         loadSongsFromDevice();
+        ImageView menuIcon = view.findViewById(R.id.menuIcon);
+        menuIcon.setOnClickListener(v -> showLogoutMenu());
 
         return view;
+    }
+
+
+    private void showLogoutMenu() {
+        PopupMenu popupMenu = new PopupMenu(requireContext(), requireView().findViewById(R.id.menuIcon));
+        popupMenu.getMenuInflater().inflate(R.menu.profile_menu, popupMenu.getMenu());
+
+        popupMenu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.menuLogout) {
+                logout();
+                return true;
+            }
+            return false;
+        });
+
+        popupMenu.show();
+    }
+
+    private void logout() {
+        // Clear login preferences
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("isLoggedIn", false);
+        editor.apply();
+
+        // Navigate back to login
+        Intent intent = new Intent(requireActivity(), LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        requireActivity().finish();
     }
 
     @Override
